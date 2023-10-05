@@ -33,6 +33,8 @@ var versionCmd = &cobra.Command{
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Printf("%15.15s : %s\n", "Version", version.Number)
+		fmt.Printf("%15.15s : %s\n", "Built For OS", version.OS)
+		fmt.Printf("%15.15s : %s\n", "Build For Arch", version.Arch)
 	},
 }
 

@@ -32,6 +32,6 @@ jobs:
         goversion: "https://dl.google.com/go/go1.21.1.linux-amd64.tar.gz"
         project_path: "./"
         binary_name: "test-tls"
-        ldflags: "-X 'github.com/cudneys/test-tls/version.Number=${GITHUB_REF##*/}'"
+        ldflags: "-X 'github.com/cudneys/test-tls/version.Number=${GITHUB_REF##*/}' -X 'github.com/cudneys/test-tls/version.Arch=${{ matrix.goarch }}' -X 'github.com/cudneys/test-tls/version.OS=${{ matrix.goos }}'"
         sha256sum: true
         
