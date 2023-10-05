@@ -24,6 +24,11 @@ jobs:
             goos: windows
     steps:
     - uses: actions/checkout@v3
+    - name: Get tag
+      id: tag
+      uses: dawidd6/action-get-tag@v1
+      with:
+        strip_v: true
     - uses: wangyoucao577/go-release-action@v1.35
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -32,6 +37,6 @@ jobs:
         goversion: "https://dl.google.com/go/go1.21.1.linux-amd64.tar.gz"
         project_path: "./"
         binary_name: "test-tls"
-        ldflags: "-X 'github.com/cudneys/test-tls/version.Number=${GITHUB_REF##*/}' -X 'github.com/cudneys/test-tls/version.Arch=${{ matrix.goarch }}' -X 'github.com/cudneys/test-tls/version.OS=${{ matrix.goos }}'"
+        ldflags: "-X 'github.com/cudneys/test-tls/version.Number=${{steps.tag.outputs.tag}}' -X 'github.com/cudneys/test-tls/version.Arch=${{ matrix.goarch }}' -X 'github.com/cudneys/test-tls/version.OS=${{ matrix.goos }}'"
         sha256sum: true
         
