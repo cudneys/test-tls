@@ -16,9 +16,11 @@ limitations under the License.
 package cmd
 
 import (
+	"github.com/cudneys/test-tls/remote"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"os"
+	"time"
 )
 
 var cfgFile string
@@ -29,7 +31,26 @@ var rootCmd = &cobra.Command{
 	Short: "Tests TLS Certificates",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
+		host, err := cmd.Flags().GetString("host")
+		if err != nil {
+			panic(err)
+		}
+
+		port, err := cmd.Flags().GetInt("port")
+		if err != nil {
+			panic(err)
+		}
+
+		start := time.Now()
+		err = remote.Test(host, port, "tcp")
+		end := time.Now()
+		delta := end.Sub(start)
+
+		if err != nil {
+			log.WithFields(log.Fields{"elapsed_time": delta, "error": err}).Error("Completed Test With Errors")
+		} else {
+			log.WithFields(log.Fields{"elapsed_time": delta}).Info("Completed Test Successfully")
+		}
 	},
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		logLevel, _ := cmd.PersistentFlags().GetString("loglevel")
@@ -58,4 +79,8 @@ func Execute() {
 
 func init() {
 	rootCmd.PersistentFlags().StringP("loglevel", "l", "INFO", "Sets the log level")
+	rootCmd.Flags().IntP("port", "p", 443, "The port to test")
+	rootCmd.Flags().StringP("host", "H", "", "Remote host to test.")
+	rootCmd.Flags().StringP("protocol", "P", "tcp", "The protocol to use for the test (tcp or udp)")
+	rootCmd.MarkFlagRequired("host")
 }
