@@ -29,6 +29,12 @@ jobs:
       uses: dawidd6/action-get-tag@v1
       with:
         strip_v: true
+    - name: Install Vulnerability Scanner
+      run: |
+        go install golang.org/x/vuln/cmd/govulncheck@latest
+    - name: Vulnerability Check
+      run: |
+        govulncheck ./...
     - uses: wangyoucao577/go-release-action@v1.35
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
