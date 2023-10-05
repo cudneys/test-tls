@@ -3,6 +3,9 @@
 ## Overview
 test-tls is a small CLI utility to test TLS certificates.  It supports local and remote certs.
 
+## Downloads
+Downloads are available in the [releases](https://github.com/cudneys/test-tls/releases) section.
+
 ## Usage
 ### Remote
 ```
