@@ -65,6 +65,13 @@ var rootCmd = &cobra.Command{
 		default:
 			log.SetLevel(log.InfoLevel)
 		}
+
+		outputFormat, _ := cmd.PersistentFlags().GetString("output")
+		if outputFormat == "json" {
+			log.SetFormatter(&log.JSONFormatter{PrettyPrint: false})
+		} else if outputFormat == "pretty-json" {
+			log.SetFormatter(&log.JSONFormatter{PrettyPrint: true})
+		}
 	},
 }
 
@@ -82,5 +89,7 @@ func init() {
 	rootCmd.Flags().IntP("port", "p", 443, "The port to test")
 	rootCmd.Flags().StringP("host", "H", "", "Remote host to test.")
 	rootCmd.Flags().StringP("protocol", "P", "tcp", "The protocol to use for the test (tcp or udp)")
+	rootCmd.PersistentFlags().StringP("output", "o", "human", "The output format (human, json, pretty-json)")
 	rootCmd.MarkFlagRequired("host")
+	rootCmd.Flags()
 }

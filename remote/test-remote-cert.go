@@ -19,21 +19,25 @@ type Cert struct {
 }
 
 func GetRemoteCert(addr string, protocol string) []Cert {
+	llog := log.WithFields(log.Fields{"address": addr, "protocol": protocol})
 	var ret []Cert
 	conf := &tls.Config{
 		InsecureSkipVerify: true,
 	}
-
-	//conn, err := tls.Dial(protocol, addr, conf)
+	llog.WithFields(log.Fields{"InsecureSkipVerify": conf.InsecureSkipVerify}).Debug("Connecting To Host")
 	conn, err := tls.DialWithDialer(&net.Dialer{Timeout: 2 * time.Second}, protocol, addr, conf)
-
 	if err != nil {
 		log.WithFields(log.Fields{"address": addr, "error": err}).Error("Failed To Connect")
 		return ret
+	} else {
+		log.WithFields(log.Fields{"server_name": conn.ConnectionState().ServerName}).Debug("Connection Established")
 	}
 	defer conn.Close()
+
+	llog.Debug("Getting Peer Certificateds")
 	certs := conn.ConnectionState().PeerCertificates
 	for _, cert := range certs {
+		llog.WithFields(log.Fields{"common_name": cert.Issuer.CommonName}).Debug("Found Peer Cert")
 		ret = append(
 			ret,
 			Cert{
@@ -47,5 +51,6 @@ func GetRemoteCert(addr string, protocol string) []Cert {
 			},
 		)
 	}
+	llog.Debug("Finished Collecting Peer Certs")
 	return ret
 }

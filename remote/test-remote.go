@@ -18,21 +18,20 @@ func Test(host string, port int, protocol string) error {
 
 	addr := fmt.Sprintf("%s:%d", host, port)
 
-	llog.WithField("addr", addr).Info("Testing Remote Host")
+	llog.WithField("addr", addr).Debug("Testing Remote Host")
 
 	conf := &tls.Config{
 		InsecureSkipVerify: false,
 	}
 
+	llog.WithFields(log.Fields{"InsecureSkipVerify": conf.InsecureSkipVerify}).Debug("Opening Connection")
 	conn, err := tls.DialWithDialer(&net.Dialer{Timeout: 5 * time.Second}, protocol, addr, conf)
 
 	if err != nil {
 		llog.WithFields(log.Fields{"error": err}).Error("Connection Unsuccessful!")
-
 		if strings.HasSuffix(err.Error(), "i/o timeout") {
 			return err
 		}
-
 		certs := GetRemoteCert(addr, protocol)
 		for n, cert := range certs {
 			clog := llog.WithField("cert_num", n)
@@ -96,6 +95,30 @@ func Test(host string, port int, protocol string) error {
 		}
 
 		return err
+	} else {
+		for _, pc := range conn.ConnectionState().PeerCertificates {
+			for nn, name := range pc.DNSNames {
+				log.WithFields(log.Fields{"number": nn, "DNSName": name}).Debug("Cert DNS Name")
+			}
+			for in, ip := range pc.IPAddresses {
+				log.WithFields(log.Fields{"IP": ip, "number": in}).Debug("Cert Authority Key")
+			}
+			log.WithFields(
+				log.Fields{
+					"Version":    pc.Version,
+					"Issuer":     pc.Issuer,
+					"IsCA":       pc.IsCA,
+					"CommonName": strings.Replace(pc.Subject.String(), "CN=", "", 1),
+				},
+			).Debug("Cert Info")
+			log.WithFields(
+				log.Fields{
+					"NotBefore": pc.NotBefore,
+					"NotAfter":  pc.NotAfter,
+				},
+			).Debug("Cert Validity period")
+
+		}
 	}
 	defer conn.Close()
 	llog.WithFields(
